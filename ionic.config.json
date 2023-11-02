@@ -1,0 +1,7 @@
+{
+  "name": "cs-focus-choice",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
