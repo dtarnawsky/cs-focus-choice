@@ -10,6 +10,9 @@ import { FocusService } from './focus.service';
 })
 export class AppComponent {
   constructor(private focusService: FocusService) {
-    focusService.init();
+  }
+
+  stackChanged() {    
+    this.focusService.focus();
   }
 }

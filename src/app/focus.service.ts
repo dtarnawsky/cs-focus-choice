@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Event, NavigationEnd, Router, RouterEvent } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { ScreenReader } from '@capacitor/screen-reader';
 
@@ -7,57 +6,31 @@ import { ScreenReader } from '@capacitor/screen-reader';
     providedIn: 'root'
 })
 export class FocusService {
-    constructor(private router: Router) {
-    }
+    public async focus() {
+        // Only want to do this with iOS voice over
+        if (Capacitor.getPlatform() !== 'ios') return;
 
-    public init() {
-        this.router.events.subscribe((event: RouterEvent | Event) => this.focusFirst(event));
-    }
+        // Only want to do this when the screen reader is enabled
+        if (!(await ScreenReader.isEnabled()).value) return;
 
-    private async focusFirst(event: RouterEvent | Event) {
-        if (!(event instanceof NavigationEnd)) return;
-        if (!ScreenReader.isEnabled()) return;        
-
-        // Animation happens
-        await this.delay(1700);
-
-        // This prevents reading of previously focused element
-        // if (Capacitor.isNativePlatform()) {
-        //     await ScreenReader.speak({ value: '	 ' });
-        // }
-
-        // We look for an element on an ion-content that we want to focus
-        const all = document.getElementsByClassName('page-focus');
-
-        // This can return more than one page
+        // This can return more than one page so select the last one
         const pages = document.querySelectorAll('.ion-page:not(.ion-page-hidden, .ion-page:has(ion-tabs))');
         let page: Element | undefined;
         pages.forEach((e) => {
             page = e;
         });
 
-        const e: Element | undefined | null = page?.querySelector('.page-focus');        
+        if (!page) return;
 
-        if (!e) {
-            console.log(`element not found on ${page?.tagName}`);
-            return;
-        }
+        // Find the element on the page with the class of page-focus
+        const e: Element | null = page?.querySelector('.page-focus');
+
+        if (!e) return;
 
         // We need to set tabindex to -1 and focus the element for the screen reader to read what we want
         (e as HTMLElement).setAttribute('tabindex', '-1');
 
-        if (Capacitor.isNativePlatform()) {
-            // This will prevent the visual change for keyboard
-            (e as HTMLElement).setAttribute('outline', 'none');
-        }
-
         console.log(`Focusing element ${e.tagName} on ${page?.tagName}`);
         (e as HTMLElement).focus();
-    }
-
-    private delay(ms: number): Promise<void> {
-        return new Promise(resolve =>
-            setTimeout(resolve, ms)
-        );
     }
 }

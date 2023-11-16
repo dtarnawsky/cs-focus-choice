@@ -15,6 +15,19 @@ In the app there are 2 pages with `<h1>` tags that should be read first on each 
 - Turn on Voice Over
 - Notice that it will begin reading an element on page 1 or 2 then when we call focus it will read what we want it to (the `h1`)
 
+## Technique ##
+We add the following to `global.scss`:
+```css
+.page-focus:focus-visible {
+    outline: none;
+}
+```
+
+We capture the `stackDidChange` event of `ion-router-outlet`:
+```html
+  <ion-router-outlet (stackDidChange)="stackChanged()"></ion-router-outlet>
+```
+
 
 ## Challenges
 We don't know **exactly** when an `ion-page` is displayed. So we take a best guess using the Angular router but we need to sleep for a certain amount of time to account for the `ion-page` animating in. Unfortunately an `ion-router-outlet` does not expose an event when it completes its animation and it does not expose which `ion-page` was animated in (so we have to guess by looking through the DOM and picking the last element).
